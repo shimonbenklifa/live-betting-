@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - "claude/**"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Lint · Typecheck · Test · Build
+    runs-on: ubuntu-latest
+
+    # Dummy values so Prisma can read its datasource block. No real DB is used;
+    # the test suite is pure, and the app builds in demo mode when DATABASE_URL
+    # is absent at runtime.
+    env:
+      DATABASE_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+      DIRECT_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
