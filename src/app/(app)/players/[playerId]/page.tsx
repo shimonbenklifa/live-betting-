@@ -3,6 +3,11 @@ import { notFound } from "next/navigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { Badge, Card, CardHeader, Stat } from "@/components/ui";
 import { getCurrentUser, getPlayer, getPortfolio } from "@/lib/data";
+import { DEMO_PLAYERS } from "@/lib/demo/data";
+
+export function generateStaticParams() {
+  return DEMO_PLAYERS.map((p) => ({ playerId: p.id }));
+}
 
 export default async function PlayerPage({ params }: { params: { playerId: string } }) {
   const [user, portfolio, player] = await Promise.all([getCurrentUser(), getPortfolio(), getPlayer(params.playerId)]);

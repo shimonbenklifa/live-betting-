@@ -4,7 +4,7 @@ import { useState } from "react";
 import * as XLSX from "xlsx";
 import { parseCsv } from "@/lib/import/parse";
 import { autoMap, validateRows } from "@/lib/import/validate";
-import { IMPORT_TEMPLATES } from "@/lib/import/templates";
+import { IMPORT_TEMPLATES, csvTemplate } from "@/lib/import/templates";
 import { ImportType, ValidationReport } from "@/lib/import/types";
 import { Badge, buttonClass } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -58,6 +58,16 @@ export function ImportWizard() {
     setStep("preview");
   }
 
+  function downloadTemplate() {
+    const blob = new Blob([csvTemplate(type)], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${type}_template.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   function reset() {
     setStep("select");
     setHeaders([]);
@@ -94,7 +104,7 @@ export function ImportWizard() {
               <p className="mt-2 text-xs text-muted">{IMPORT_TEMPLATES[type].description}</p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <a href={`/api/import/template?type=${type}`} className={buttonClass("outline")}>Download {type} template</a>
+              <button onClick={downloadTemplate} className={buttonClass("outline")}>Download {type} template</button>
               <label className={cn(buttonClass("primary"), "cursor-pointer")}>
                 Upload CSV / XLSX
                 <input type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />

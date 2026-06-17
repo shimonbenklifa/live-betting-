@@ -3,7 +3,12 @@ import { notFound } from "next/navigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { Badge, Card, CardHeader, Stat } from "@/components/ui";
 import { getCurrentUser, getGames, getPortfolio, getRoster, getTeam } from "@/lib/data";
+import { DEMO_TEAMS } from "@/lib/demo/data";
 import { formatDateTime } from "@/lib/utils";
+
+export function generateStaticParams() {
+  return DEMO_TEAMS.map((t) => ({ teamId: t.id }));
+}
 
 export default async function TeamPage({ params }: { params: { teamId: string } }) {
   const [user, portfolio, team] = await Promise.all([getCurrentUser(), getPortfolio(), getTeam(params.teamId)]);

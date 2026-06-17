@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import { MarketVM } from "@/lib/data/types";
 import { MarketState } from "@/lib/trading/types";
 import { quote } from "@/lib/trading/engine";
 import { buttonClass } from "@/components/ui";
-import { submitTrade } from "@/app/actions/trade";
+import { previewTrade } from "@/lib/demo/actions";
 import { cn } from "@/lib/utils";
 
 /**
@@ -17,7 +17,6 @@ export function OrderTicket({ market }: { market: MarketVM }) {
   const [side, setSide] = useState<"BUY" | "SELL">("BUY");
   const [outcomeId, setOutcomeId] = useState(market.outcomes[0]?.id ?? "");
   const [shares, setShares] = useState(10);
-  const [pending, startTransition] = useTransition();
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   const state: MarketState = useMemo(
@@ -42,11 +41,8 @@ export function OrderTicket({ market }: { market: MarketVM }) {
   const closed = market.status !== "open" || new Date(market.closesAt).getTime() <= Date.now();
 
   function onSubmit() {
-    setResult(null);
-    startTransition(async () => {
-      const res = await submitTrade({ marketId: market.id, outcomeId, side, shares: Math.trunc(shares) });
-      setResult({ ok: res.ok, message: res.message });
-    });
+    const res = previewTrade({ marketId: market.id, outcomeId, side, shares: Math.trunc(shares) });
+    setResult({ ok: res.ok, message: res.message });
   }
 
   const selected = market.outcomes.find((o) => o.id === outcomeId);
@@ -116,10 +112,10 @@ export function OrderTicket({ market }: { market: MarketVM }) {
 
       <button
         onClick={onSubmit}
-        disabled={pending || closed || !preview}
+        disabled={closed || !preview}
         className={cn(buttonClass(side === "BUY" ? "yes" : "no"), "w-full")}
       >
-        {closed ? "Market closed" : pending ? "Submitting…" : `${side} ${Math.trunc(shares) || 0} shares`}
+        {closed ? "Market closed" : `${side} ${Math.trunc(shares) || 0} shares`}
       </button>
 
       {result && (

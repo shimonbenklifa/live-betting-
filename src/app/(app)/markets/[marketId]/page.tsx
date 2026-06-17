@@ -4,7 +4,12 @@ import { TopBar } from "@/components/layout/TopBar";
 import { Badge, Card, CardHeader, ProbabilityBar } from "@/components/ui";
 import { OrderTicket } from "@/components/market/OrderTicket";
 import { getCurrentUser, getMarket, getPortfolio } from "@/lib/data";
+import { DEMO_MARKETS } from "@/lib/demo/data";
 import { formatDateTime } from "@/lib/utils";
+
+export function generateStaticParams() {
+  return DEMO_MARKETS.map((m) => ({ marketId: m.id }));
+}
 
 export default async function MarketDetailPage({ params }: { params: { marketId: string } }) {
   const [user, portfolio, market] = await Promise.all([getCurrentUser(), getPortfolio(), getMarket(params.marketId)]);

@@ -1,23 +1,18 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { MarketVM } from "@/lib/data/types";
 import { buttonClass } from "@/components/ui";
-import { resolveMarket } from "@/app/actions/admin";
+import { previewResolve } from "@/lib/demo/actions";
 import { cn } from "@/lib/utils";
 
 export function ResolveForm({ market }: { market: MarketVM }) {
   const [winner, setWinner] = useState("");
   const [note, setNote] = useState("");
-  const [pending, start] = useTransition();
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   function submit() {
-    setResult(null);
-    start(async () => {
-      const res = await resolveMarket({ marketId: market.id, winningOutcomeId: winner, note });
-      setResult(res);
-    });
+    setResult(previewResolve({ winningOutcomeId: winner }));
   }
 
   return (
@@ -36,8 +31,8 @@ export function ResolveForm({ market }: { market: MarketVM }) {
           <label className="mb-1 block text-xs text-muted">Note (optional)</label>
           <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Final 88-81" className="w-full rounded-lg border border-line bg-ink-700 px-3 py-2 text-sm text-white" />
         </div>
-        <button onClick={submit} disabled={pending || !winner} className={cn(buttonClass("primary"))}>
-          {pending ? "Resolving…" : "Resolve"}
+        <button onClick={submit} disabled={!winner} className={cn(buttonClass("primary"))}>
+          Resolve
         </button>
       </div>
       {result && (

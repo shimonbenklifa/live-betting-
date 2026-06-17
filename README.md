@@ -11,6 +11,15 @@ use — **not** a real-money gambling product.
 > behind a documented legal/compliance review (`ENABLE_REAL_MONEY`, off by
 > default). Do not enable it without that review.
 
+## Live demo
+
+A static export of the app is deployed to GitHub Pages and runs fully in the
+browser in demo mode:
+
+**▶️ https://shimonbenklifa.github.io/live-betting-/**
+
+(Deployed by `.github/workflows/pages.yml` on every push.)
+
 ## Highlights
 
 - **Trading engine** — a single LMSR (Logarithmic Market Scoring Rule) market
@@ -98,11 +107,19 @@ src/
                         # games, portfolio, leaderboard, futures, stats,
                         # teams, players, admin (+ import, resolve, markets,
                         # balances)
-    actions/            # server actions (trade, admin)
-    api/import/template # downloadable CSV templates
 prisma/schema.prisma    # full Postgres schema (all models)
 supabase/rls-policies.sql
 ```
+
+### Build targets
+
+- **Server (default):** `npm run build` / `npm start` — full SSR; the
+  DB-backed write services (`src/lib/trading/service.ts`,
+  `resolveService.ts`) execute trades & resolutions in serializable
+  transactions.
+- **Static (GitHub Pages):** `GITHUB_PAGES=true npm run build` → `out/`. The UI
+  runs entirely client-side in demo mode (the LMSR pricing engine is pure, so
+  quotes and previews are computed in the browser).
 
 ### Why one `Market` model for games *and* futures?
 
@@ -163,5 +180,8 @@ links), and bulk-import validation (mapping, coercion, duplicate detection).
 
 The read layer currently serves the demo dataset; swapping each reader in
 `src/lib/data` to a Prisma query (one query boundary each) wires the UI to the
-seeded database. The write paths (`service.ts`, `resolveService.ts`) are already
-DB-backed and run automatically once `DATABASE_URL` is set.
+seeded database. The DB-backed write paths (`src/lib/trading/service.ts`,
+`resolveService.ts`) implement atomic trade execution and settlement; wiring
+them behind server actions (replacing the client-side demo previews in
+`src/lib/demo/actions.ts`) is the production trading path once `DATABASE_URL`
+is configured.

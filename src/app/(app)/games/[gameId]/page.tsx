@@ -4,7 +4,12 @@ import { TopBar } from "@/components/layout/TopBar";
 import { Badge, Card } from "@/components/ui";
 import { MarketCard } from "@/components/market/MarketCard";
 import { getCurrentUser, getGame, getMarkets, getPortfolio } from "@/lib/data";
+import { DEMO_GAMES } from "@/lib/demo/data";
 import { formatDateTime } from "@/lib/utils";
+
+export function generateStaticParams() {
+  return DEMO_GAMES.map((g) => ({ gameId: g.id }));
+}
 
 export default async function GameDetailPage({ params }: { params: { gameId: string } }) {
   const [user, portfolio, game] = await Promise.all([getCurrentUser(), getPortfolio(), getGame(params.gameId)]);

@@ -1,24 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { buttonClass } from "@/components/ui";
-import { adjustBalance } from "@/app/actions/admin";
+import { previewAdjustBalance } from "@/lib/demo/actions";
 import { cn } from "@/lib/utils";
 
 export function AdjustBalanceForm({ members }: { members: { userId: string; displayName: string }[] }) {
   const [userId, setUserId] = useState(members[0]?.userId ?? "");
   const [delta, setDelta] = useState(0);
   const [reason, setReason] = useState("");
-  const [pending, start] = useTransition();
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   function submit() {
-    setResult(null);
-    start(async () => {
-      const res = await adjustBalance({ userId, delta: Math.trunc(delta), reason });
-      setResult(res);
-      if (res.ok) setReason("");
-    });
+    const res = previewAdjustBalance({ delta: Math.trunc(delta), reason });
+    setResult(res);
+    if (res.ok) setReason("");
   }
 
   return (
@@ -39,7 +35,7 @@ export function AdjustBalanceForm({ members }: { members: { userId: string; disp
         <label className="mb-1 block text-xs text-muted">Reason (required)</label>
         <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Correcting duplicate signup grant" className="w-full rounded-lg border border-line bg-ink-700 px-3 py-2 text-sm text-white" />
       </div>
-      <button onClick={submit} disabled={pending} className={buttonClass("primary")}>{pending ? "Posting…" : "Post adjustment"}</button>
+      <button onClick={submit} className={buttonClass("primary")}>Post adjustment</button>
       {result && <p className={cn("rounded-lg px-3 py-2 text-xs", result.ok ? "bg-yes/10 text-yes" : "bg-no/10 text-no")}>{result.message}</p>}
     </div>
   );

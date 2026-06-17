@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { buttonClass } from "@/components/ui";
-import { createMarket } from "@/app/actions/admin";
+import { previewCreateMarket } from "@/lib/demo/actions";
 import { cn } from "@/lib/utils";
 
 export function CreateMarketForm() {
@@ -11,16 +11,12 @@ export function CreateMarketForm() {
   const [scope, setScope] = useState<"GAME" | "FUTURES">("GAME");
   const [outcomes, setOutcomes] = useState("YES\nNO");
   const [closesAt, setClosesAt] = useState("");
-  const [pending, start] = useTransition();
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   function submit() {
-    setResult(null);
-    start(async () => {
-      const res = await createMarket({ title, kind, scope, outcomes: outcomes.split("\n"), closesAt });
-      setResult(res);
-      if (res.ok) setTitle("");
-    });
+    const res = previewCreateMarket({ title, kind, outcomes: outcomes.split("\n") });
+    setResult(res);
+    if (res.ok) setTitle("");
   }
 
   return (
@@ -54,7 +50,7 @@ export function CreateMarketForm() {
         <label className="mb-1 block text-xs text-muted">Outcomes (one per line)</label>
         <textarea value={outcomes} onChange={(e) => setOutcomes(e.target.value)} rows={4} className="w-full rounded-lg border border-line bg-ink-700 px-3 py-2 text-sm text-white font-mono" />
       </div>
-      <button onClick={submit} disabled={pending} className={buttonClass("primary")}>{pending ? "Creating…" : "Create market"}</button>
+      <button onClick={submit} className={buttonClass("primary")}>Create market</button>
       {result && <p className={cn("rounded-lg px-3 py-2 text-xs", result.ok ? "bg-yes/10 text-yes" : "bg-no/10 text-no")}>{result.message}</p>}
     </div>
   );
