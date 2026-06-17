@@ -11,8 +11,7 @@ const NAV = [
   { href: "/stats", label: "Stats", icon: "≡" },
   { href: "/teams", label: "Teams", icon: "⛨" },
   { href: "/portfolio", label: "Portfolio", icon: "❖" },
-  { href: "/leaderboard", label: "Leaderboard", icon: "♛" },
-  { href: "/admin", label: "Admin", icon: "⚙" }
+  { href: "/leaderboard", label: "Leaderboard", icon: "♛" }
 ];
 
 export function Sidebar({ appName }: { appName: string }) {
@@ -41,7 +40,13 @@ export function Sidebar({ appName }: { appName: string }) {
           );
         })}
       </nav>
-      <div className="mt-4 rounded-lg border border-line bg-ink-700 px-3 py-2 text-[11px] leading-relaxed text-muted">
+      <Link
+        href="/admin"
+        className="mt-4 flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+      >
+        <span className="text-xs">⚙</span> Admin Portal
+      </Link>
+      <div className="mt-3 rounded-lg border border-line bg-ink-700 px-3 py-2 text-[11px] leading-relaxed text-muted">
         <span className="font-medium text-warn">Play-money only.</span> No deposits, withdrawals, or cash payouts.
       </div>
     </aside>
