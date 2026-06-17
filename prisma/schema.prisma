@@ -1,0 +1,595 @@
+// =============================================================================
+// League Prediction Market — Prisma schema (PostgreSQL / Supabase)
+//
+// Design notes:
+//  * Play-money only. All balances are INTEGER credits. No real currency.
+//  * Game markets and futures markets share ONE `Market`/`Outcome`/`Order`/
+//    `Trade`/`Position` model (distinguished by Market.scope + Market.futureType)
+//    so there is a single, auditable settlement path. Futures simply allow >2
+//    outcomes (MULTI / RANKED) and reference a season instead of a game.
+//  * Every credit movement is an append-only LedgerEntry. Admin financial-like
+//    actions also write an AdminAuditLog row.
+//  * Row-Level Security is enforced in Supabase (see supabase/rls-policies.sql).
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// --- Identity & membership ---------------------------------------------------
+
+model User {
+  id              String   @id @default(uuid()) // mirrors Supabase auth.users.id
+  email           String   @unique
+  displayName     String
+  avatarUrl       String?
+  isPlatformAdmin Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  memberships LeagueMember[]
+  wallets     Wallet[]
+  orders      Order[]
+  trades      Trade[]
+  positions   Position[]
+  auditLogs   AdminAuditLog[] @relation("AdminActor")
+
+  @@map("users")
+}
+
+model League {
+  id               String   @id @default(uuid())
+  name             String
+  slug             String   @unique
+  description      String?
+  season           String   @default("2026")
+  // Compliance gate: real money is OFF unless explicitly enabled after review.
+  realMoneyEnabled Boolean  @default(false)
+  startingCredits  Int      @default(10000)
+  createdAt        DateTime @default(now())
+
+  members            LeagueMember[]
+  teams              Team[]
+  players            Player[]
+  games              Game[]
+  markets            Market[]
+  wallets            Wallet[]
+  awards             Award[]
+  importBatches      ImportBatch[]
+  standingsSnapshots StandingsSnapshot[]
+  statLeaderboards   StatLeaderboard[]
+  auditLogs          AdminAuditLog[]
+
+  @@map("leagues")
+}
+
+enum MemberRole {
+  MEMBER
+  ADMIN
+  OWNER
+}
+
+model LeagueMember {
+  id       String     @id @default(uuid())
+  leagueId String
+  userId   String
+  role     MemberRole @default(MEMBER)
+  joinedAt DateTime   @default(now())
+
+  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([leagueId, userId])
+  @@index([userId])
+  @@map("league_members")
+}
+
+// --- Sport entities ----------------------------------------------------------
+
+model Team {
+  id           String   @id @default(uuid())
+  leagueId     String
+  name         String
+  abbreviation String
+  division     String?
+  captainName  String?
+  captainEmail String?
+  homeColor    String?
+  awayColor    String?
+  createdAt    DateTime @default(now())
+
+  league      League           @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  players     Player[]
+  homeGames   Game[]           @relation("HomeTeam")
+  awayGames   Game[]           @relation("AwayTeam")
+  seasonStats TeamSeasonStat[]
+
+  @@unique([leagueId, name])
+  @@map("teams")
+}
+
+enum PlayerStatus {
+  active
+  injured
+  inactive
+}
+
+model Player {
+  id           String       @id @default(uuid())
+  leagueId     String
+  teamId       String?
+  firstName    String
+  lastName     String
+  email        String?
+  phone        String?
+  jerseyNumber Int?
+  position     String?
+  height       String?
+  status       PlayerStatus @default(active)
+  createdAt    DateTime     @default(now())
+
+  league      League             @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  team        Team?              @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  seasonStats PlayerSeasonStat[]
+  candidacies AwardCandidate[]
+
+  @@index([leagueId])
+  @@index([teamId])
+  @@map("players")
+}
+
+enum GameStatus {
+  scheduled
+  live
+  final
+}
+
+model Game {
+  id         String     @id @default(uuid())
+  leagueId   String
+  homeTeamId String
+  awayTeamId String
+  startsAt   DateTime
+  venue      String?
+  week       Int?
+  status     GameStatus @default(scheduled)
+  homeScore  Int?
+  awayScore  Int?
+  createdAt  DateTime   @default(now())
+
+  league   League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  homeTeam Team     @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam Team     @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  markets  Market[]
+
+  @@index([leagueId, startsAt])
+  @@map("games")
+}
+
+// --- Markets (game + futures, unified) --------------------------------------
+
+enum MarketScope {
+  GAME
+  FUTURES
+}
+
+enum MarketKind {
+  BINARY
+  MULTI
+  RANKED
+}
+
+enum MarketStatus {
+  open
+  closed
+  resolved
+  void
+}
+
+enum FutureType {
+  LEAGUE_CHAMPION
+  TOURNAMENT_WINNER
+  FINALS_MVP
+  REGULAR_SEASON_MVP
+  LEADING_SCORER
+  ASSIST_LEADER
+  REBOUND_LEADER
+  DEFENSIVE_PLAYER
+  ROOKIE_OF_YEAR
+  BEST_RECORD
+  WORST_RECORD
+  MOST_POINTS_SINGLE_GAME
+  TEAM_TO_MAKE_FINALS
+  TEAM_TO_MAKE_PLAYOFFS
+}
+
+model Market {
+  id          String       @id @default(uuid())
+  leagueId    String
+  gameId      String? // null for futures markets
+  scope       MarketScope  @default(GAME)
+  kind        MarketKind   @default(BINARY)
+  futureType  FutureType?
+  title       String
+  description String?
+  // LMSR liquidity parameter b (credits of max subsidy ≈ b * ln(#outcomes)).
+  liquidity   Float        @default(100)
+  status      MarketStatus @default(open)
+  closesAt    DateTime
+  createdById String?
+  createdAt   DateTime     @default(now())
+
+  league     League            @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  game       Game?             @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  outcomes   Outcome[]
+  orders     Order[]
+  trades     Trade[]
+  positions  Position[]
+  resolution MarketResolution?
+  award      Award?
+
+  @@index([leagueId, status])
+  @@index([gameId])
+  @@map("markets")
+}
+
+model Outcome {
+  id        String  @id @default(uuid())
+  marketId  String
+  label     String
+  // Net shares the market maker has sold to users (q_i for LMSR pricing).
+  shares    Int     @default(0)
+  sortOrder Int     @default(0)
+  isWinner  Boolean @default(false)
+
+  market    Market     @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  orders    Order[]
+  trades    Trade[]
+  positions Position[]
+
+  @@index([marketId])
+  @@map("outcomes")
+}
+
+// --- Wallets & ledger --------------------------------------------------------
+
+model Wallet {
+  id        String   @id @default(uuid())
+  leagueId  String
+  userId    String
+  // Authoritative balance in whole credits. Always == sum(ledger.delta).
+  balance   Int      @default(0)
+  createdAt DateTime @default(now())
+
+  league League        @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ledger LedgerEntry[]
+
+  @@unique([leagueId, userId])
+  @@map("wallets")
+}
+
+enum LedgerReason {
+  SIGNUP_GRANT
+  TRADE_BUY
+  TRADE_SELL
+  MARKET_SETTLEMENT
+  ADMIN_ADJUSTMENT
+  REFUND
+}
+
+model LedgerEntry {
+  id              String       @id @default(uuid())
+  walletId        String
+  reason          LedgerReason
+  delta           Int // signed credit movement
+  balanceBefore   Int
+  balanceAfter    Int
+  memo            String?
+  refTradeId      String?
+  refMarketId     String?
+  refResolutionId String?
+  createdAt       DateTime     @default(now())
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([walletId, createdAt])
+  @@map("ledger_entries")
+}
+
+// --- Orders, trades, positions ----------------------------------------------
+
+enum OrderSide {
+  BUY
+  SELL
+}
+
+enum OrderStatus {
+  filled
+  rejected
+}
+
+model Order {
+  id            String      @id @default(uuid())
+  marketId      String
+  outcomeId     String
+  userId        String
+  side          OrderSide
+  shares        Int
+  // Realized average price (cents) and total cash for the fill.
+  avgPriceCents Float
+  cash          Int
+  status        OrderStatus @default(filled)
+  createdAt     DateTime    @default(now())
+
+  market  Market  @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  outcome Outcome @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trade   Trade?
+
+  @@index([userId, createdAt])
+  @@map("orders")
+}
+
+model Trade {
+  id         String    @id @default(uuid())
+  orderId    String    @unique
+  marketId   String
+  outcomeId  String
+  userId     String
+  side       OrderSide
+  shares     Int
+  cash       Int
+  priceCents Float
+  createdAt  DateTime  @default(now())
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  market  Market  @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  outcome Outcome @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([marketId, createdAt])
+  @@map("trades")
+}
+
+model Position {
+  id          String   @id @default(uuid())
+  marketId    String
+  outcomeId   String
+  userId      String
+  quantity    Int      @default(0)
+  costBasis   Int      @default(0)
+  realizedPnl Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  market  Market  @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  outcome Outcome @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, outcomeId])
+  @@index([marketId])
+  @@map("positions")
+}
+
+// --- Resolution & audit ------------------------------------------------------
+
+model MarketResolution {
+  id               String   @id @default(uuid())
+  marketId         String   @unique
+  winningOutcomeId String
+  resolvedById     String
+  note             String?
+  totalPayout      Int      @default(0)
+  resolvedAt       DateTime @default(now())
+
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+
+  @@map("market_resolutions")
+}
+
+enum AuditAction {
+  CREATE_LEAGUE
+  CREATE_TEAM
+  CREATE_PLAYER
+  CREATE_GAME
+  CREATE_MARKET
+  RESOLVE_MARKET
+  ADJUST_BALANCE
+  IMPORT_COMMIT
+  IMPORT_ROLLBACK
+  LOCK_STATS
+  RESOLVE_AWARD
+}
+
+model AdminAuditLog {
+  id         String      @id @default(uuid())
+  leagueId   String
+  actorId    String
+  action     AuditAction
+  entityType String
+  entityId   String?
+  // Structured before/after + reason for full financial-like traceability.
+  detail     Json
+  createdAt  DateTime    @default(now())
+
+  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  actor  User   @relation("AdminActor", fields: [actorId], references: [id])
+
+  @@index([leagueId, createdAt])
+  @@map("admin_audit_log")
+}
+
+// --- Bulk import -------------------------------------------------------------
+
+enum ImportType {
+  teams
+  rosters
+  players
+  coaches
+  games
+  player_stats
+  team_standings
+  historical_stats
+}
+
+enum ImportStatus {
+  pending
+  previewed
+  committed
+  rolled_back
+  failed
+}
+
+model ImportBatch {
+  id               String       @id @default(uuid())
+  leagueId         String
+  type             ImportType
+  filename         String
+  status           ImportStatus @default(pending)
+  uploadedById     String
+  mapping          Json
+  totalRows        Int          @default(0)
+  validRows        Int          @default(0)
+  errorRows        Int          @default(0)
+  committedRows    Int          @default(0)
+  // IDs of records created by this batch, enabling exact rollback.
+  createdEntityIds Json?
+  createdAt        DateTime     @default(now())
+  committedAt      DateTime?
+  rolledBackAt     DateTime?
+
+  league League      @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  rows   ImportRow[]
+
+  @@index([leagueId, createdAt])
+  @@map("import_batches")
+}
+
+model ImportRow {
+  id              String  @id @default(uuid())
+  batchId         String
+  rowNumber       Int
+  raw             Json
+  normalized      Json
+  isValid         Boolean @default(true)
+  isDuplicate     Boolean @default(false)
+  issues          Json
+  createdEntityId String?
+
+  batch ImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId, rowNumber])
+  @@map("import_rows")
+}
+
+// --- Stats, standings, leaderboards -----------------------------------------
+
+model PlayerSeasonStat {
+  id          String   @id @default(uuid())
+  playerId    String
+  season      String
+  week        Int?
+  points      Float    @default(0)
+  assists     Float    @default(0)
+  rebounds    Float    @default(0)
+  steals      Float    @default(0)
+  blocks      Float    @default(0)
+  gamesPlayed Int      @default(0)
+  locked      Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, season])
+  @@map("player_season_stats")
+}
+
+model TeamSeasonStat {
+  id            String   @id @default(uuid())
+  teamId        String
+  season        String
+  wins          Int      @default(0)
+  losses        Int      @default(0)
+  pointsFor     Float    @default(0)
+  pointsAgainst Float    @default(0)
+  updatedAt     DateTime @updatedAt
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, season])
+  @@map("team_season_stats")
+}
+
+model StandingsSnapshot {
+  id        String   @id @default(uuid())
+  leagueId  String
+  season    String
+  takenAt   DateTime @default(now())
+  // [{ teamId, teamName, wins, losses, pct, rank }]
+  standings Json
+
+  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  @@index([leagueId, takenAt])
+  @@map("standings_snapshots")
+}
+
+model StatLeaderboard {
+  id        String   @id @default(uuid())
+  leagueId  String
+  season    String
+  category  String // e.g. "points", "assists", "rebounds"
+  locked    Boolean  @default(false)
+  // [{ playerId, playerName, teamName, value, rank }]
+  entries   Json
+  updatedAt DateTime @updatedAt
+
+  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+
+  @@unique([leagueId, season, category])
+  @@map("stat_leaderboards")
+}
+
+// --- Awards (resolve futures markets) ---------------------------------------
+
+enum AwardStatus {
+  open
+  locked
+  resolved
+}
+
+model Award {
+  id                String      @id @default(uuid())
+  leagueId          String
+  marketId          String?     @unique // the futures market that trades this award
+  futureType        FutureType
+  title             String
+  status            AwardStatus @default(open)
+  winnerCandidateId String?
+  createdAt         DateTime    @default(now())
+
+  league     League           @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  market     Market?          @relation(fields: [marketId], references: [id], onDelete: SetNull)
+  candidates AwardCandidate[]
+
+  @@map("awards")
+}
+
+model AwardCandidate {
+  id        String  @id @default(uuid())
+  awardId   String
+  playerId  String?
+  label     String // player or team name (denormalized for display)
+  outcomeId String? // links to the Market outcome users trade
+
+  award  Award   @relation(fields: [awardId], references: [id], onDelete: Cascade)
+  player Player? @relation(fields: [playerId], references: [id], onDelete: SetNull)
+
+  @@index([awardId])
+  @@map("award_candidates")
+}
