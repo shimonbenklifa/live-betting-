@@ -35,11 +35,11 @@ export default async function TeamPage({ params }: { params: { teamId: string } 
                 <Link key={p.id} href={`/players/${p.id}`} className="flex items-center justify-between px-4 py-2.5 hover:bg-ink-700">
                   <div className="flex items-center gap-3">
                     <span className="w-6 text-center tabular text-sm text-muted">#{p.jerseyNumber}</span>
-                    <span className="text-sm font-medium text-gray-200">{p.firstName} {p.lastName}</span>
+                    <span className="text-sm font-medium text-slate-700">{p.firstName} {p.lastName}</span>
                     <Badge tone="muted">{p.position}</Badge>
                     {p.status !== "active" && <Badge tone="warn">{p.status}</Badge>}
                   </div>
-                  <span className="tabular text-sm text-white">{p.stats.points} ppg</span>
+                  <span className="tabular text-sm text-body">{p.stats.points} ppg</span>
                 </Link>
               ))}
             </div>
@@ -50,7 +50,7 @@ export default async function TeamPage({ params }: { params: { teamId: string } 
             <div className="divide-y divide-line">
               {teamGames.map((g) => (
                 <Link key={g.id} href={`/games/${g.id}`} className="flex items-center justify-between px-4 py-2.5 hover:bg-ink-700">
-                  <span className="text-sm text-gray-200">{g.awayTeam.abbreviation} @ {g.homeTeam.abbreviation}</span>
+                  <span className="text-sm text-slate-700">{g.awayTeam.abbreviation} @ {g.homeTeam.abbreviation}</span>
                   <span className="text-xs text-muted">{g.status === "final" ? `Final ${g.awayScore}-${g.homeScore}` : formatDateTime(g.startsAt)}</span>
                 </Link>
               ))}

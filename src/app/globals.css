@@ -3,22 +3,18 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
 body {
-  background-color: #0a0c10;
-  color: #e6e9ef;
+  background-color: #f4f6fa;
+  color: #0c1322;
 }
 
 body {
-  font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
-}
-
-* {
-  border-color: #222937;
+  text-rendering: optimizeLegibility;
 }
 
 .tabular {
@@ -27,17 +23,20 @@ body {
 }
 
 ::selection {
-  background: rgba(59, 130, 246, 0.35);
+  background: rgba(37, 99, 235, 0.18);
 }
 
-/* Slim scrollbars for the fintech feel */
+/* Slim, light scrollbars */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #252c3a;
+  background: #d4dbe6;
   border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c2cbd9;
 }
 ::-webkit-scrollbar-track {
   background: transparent;

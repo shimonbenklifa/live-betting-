@@ -19,11 +19,11 @@ export default async function StatsPage() {
                   <div className="flex items-center gap-3">
                     <span className="w-4 text-center text-xs text-muted">{e.rank}</span>
                     <div>
-                      <Link href={`/players/${e.playerId}`} className="font-medium text-gray-200 hover:text-white">{e.playerName}</Link>
+                      <Link href={`/players/${e.playerId}`} className="font-medium text-slate-700 hover:text-body">{e.playerName}</Link>
                       <div className="text-xs text-muted">{e.teamName}</div>
                     </div>
                   </div>
-                  <span className="tabular font-semibold text-white">{e.value}</span>
+                  <span className="tabular font-semibold text-body">{e.value}</span>
                 </div>
               ))}
             </div>

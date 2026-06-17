@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { Badge, Card, CardHeader, ProbabilityBar } from "@/components/ui";
 import { OrderTicket } from "@/components/market/OrderTicket";
+import { PriceChart } from "@/components/charts/PriceChart";
+import { marketSeries } from "@/lib/demo/history";
 import { getCurrentUser, getMarket, getPortfolio } from "@/lib/data";
 import { DEMO_MARKETS } from "@/lib/demo/data";
 import { formatDateTime } from "@/lib/utils";
@@ -29,7 +31,7 @@ export default async function MarketDetailPage({ params }: { params: { marketId:
               <Badge tone="default">{market.kind}</Badge>
               <Badge tone={market.status === "open" ? "yes" : "warn"}>{market.status}</Badge>
             </div>
-            <h1 className="text-xl font-semibold text-white">{market.title}</h1>
+            <h1 className="text-xl font-semibold text-body">{market.title}</h1>
             <p className="mt-1 text-sm text-muted">{market.description}</p>
             <div className="mt-3 flex flex-wrap gap-4 text-xs text-muted">
               <span>Closes {formatDateTime(market.closesAt)}</span>
@@ -40,15 +42,22 @@ export default async function MarketDetailPage({ params }: { params: { marketId:
           </Card>
 
           <Card>
+            <CardHeader title="Price history" subtitle="Implied probability (%) over the last 28 days" />
+            <div className="px-4 py-4">
+              <PriceChart series={marketSeries(market.outcomes)} />
+            </div>
+          </Card>
+
+          <Card>
             <CardHeader title="Outcomes" subtitle="Price in cents ≈ implied probability" />
             <div className="divide-y divide-line">
               {sorted.map((o) => (
                 <div key={o.id} className="px-4 py-3">
                   <div className="mb-1.5 flex items-center justify-between">
-                    <span className="text-sm font-medium text-white">{o.label}</span>
+                    <span className="text-sm font-medium text-body">{o.label}</span>
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-muted tabular">{Math.round(o.probability * 100)}%</span>
-                      <span className="tabular text-base font-semibold text-white">{o.priceCents}¢</span>
+                      <span className="tabular text-base font-semibold text-body">{o.priceCents}¢</span>
                     </div>
                   </div>
                   <ProbabilityBar probability={o.probability} />
@@ -63,7 +72,7 @@ export default async function MarketDetailPage({ params }: { params: { marketId:
               <div className="divide-y divide-line">
                 {myPositions.map((p) => (
                   <div key={p.outcomeId} className="flex items-center justify-between px-4 py-3 text-sm">
-                    <span className="text-gray-200">{p.outcomeLabel}</span>
+                    <span className="text-slate-700">{p.outcomeLabel}</span>
                     <div className="flex items-center gap-5 tabular">
                       <span className="text-muted">{p.quantity} sh @ {p.avgCostCents}¢</span>
                       <span className={p.unrealizedPnl >= 0 ? "text-yes" : "text-no"}>

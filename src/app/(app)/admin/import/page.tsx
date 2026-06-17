@@ -40,10 +40,10 @@ export default async function ImportCenterPage() {
                 {batches.map((b) => (
                   <tr key={b.id} className="hover:bg-ink-700">
                     <td className="px-4 py-2.5 text-muted">{formatDateTime(b.createdAt)}</td>
-                    <td className="px-4 py-2.5 capitalize text-gray-200">{b.type.replace(/_/g, " ")}</td>
-                    <td className="px-4 py-2.5 text-gray-200">{b.filename}</td>
+                    <td className="px-4 py-2.5 capitalize text-slate-700">{b.type.replace(/_/g, " ")}</td>
+                    <td className="px-4 py-2.5 text-slate-700">{b.filename}</td>
                     <td className="px-4 py-2.5"><Badge tone={statusTone[b.status] ?? "muted"}>{b.status}</Badge></td>
-                    <td className="px-4 py-2.5 text-right tabular text-gray-200">{b.totalRows}</td>
+                    <td className="px-4 py-2.5 text-right tabular text-slate-700">{b.totalRows}</td>
                     <td className="px-4 py-2.5 text-right tabular text-no">{b.errorRows}</td>
                     <td className="px-4 py-2.5 text-right tabular text-yes">{b.committedRows}</td>
                   </tr>

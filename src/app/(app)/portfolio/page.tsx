@@ -2,6 +2,8 @@ import Link from "next/link";
 import { TopBar } from "@/components/layout/TopBar";
 import { Card, CardHeader, Stat, Badge, EmptyState } from "@/components/ui";
 import { getCurrentUser, getPortfolio } from "@/lib/data";
+import { Sparkline } from "@/components/charts/PriceChart";
+import { valueHistory } from "@/lib/demo/history";
 import { formatCredits } from "@/lib/money";
 import { cn, formatDateTime, pnlColor, signed } from "@/lib/utils";
 
@@ -18,6 +20,13 @@ export default async function PortfolioPage() {
           <Stat label="Positions Value" value={formatCredits(portfolio.positionsValue)} />
           <Stat label="Total P&L" value={signed(portfolio.totalUnrealizedPnl + portfolio.totalRealizedPnl)} tone={pnlColor(portfolio.totalUnrealizedPnl + portfolio.totalRealizedPnl)} />
         </section>
+
+        <Card>
+          <CardHeader title="Portfolio value" subtitle="Total credits (cash + positions) over the last 28 days" />
+          <div className="px-4 py-4">
+            <Sparkline points={valueHistory("portfolio-you", portfolio.totalValue)} color="#2563eb" height={90} />
+          </div>
+        </Card>
 
         <Card>
           <CardHeader title="Open positions" subtitle={`${portfolio.positions.length} positions`} />
@@ -41,13 +50,13 @@ export default async function PortfolioPage() {
                   {portfolio.positions.map((p) => (
                     <tr key={p.outcomeId} className="hover:bg-ink-700">
                       <td className="px-4 py-2.5">
-                        <Link href={`/markets/${p.marketId}`} className="text-gray-200 hover:text-white">{p.marketTitle}</Link>
+                        <Link href={`/markets/${p.marketId}`} className="text-slate-700 hover:text-body">{p.marketTitle}</Link>
                       </td>
                       <td className="px-4 py-2.5"><Badge tone="muted">{p.outcomeLabel}</Badge></td>
-                      <td className="px-4 py-2.5 text-right tabular text-gray-200">{p.quantity}</td>
+                      <td className="px-4 py-2.5 text-right tabular text-slate-700">{p.quantity}</td>
                       <td className="px-4 py-2.5 text-right tabular text-muted">{p.avgCostCents}¢</td>
-                      <td className="px-4 py-2.5 text-right tabular text-white">{p.priceCents}¢</td>
-                      <td className="px-4 py-2.5 text-right tabular text-white">{formatCredits(p.marketValue)}</td>
+                      <td className="px-4 py-2.5 text-right tabular text-body">{p.priceCents}¢</td>
+                      <td className="px-4 py-2.5 text-right tabular text-body">{formatCredits(p.marketValue)}</td>
                       <td className={cn("px-4 py-2.5 text-right tabular font-medium", pnlColor(p.unrealizedPnl))}>{signed(p.unrealizedPnl)}</td>
                     </tr>
                   ))}
@@ -76,12 +85,12 @@ export default async function PortfolioPage() {
                 {portfolio.trades.map((t) => (
                   <tr key={t.id} className="hover:bg-ink-700">
                     <td className="px-4 py-2.5 text-muted">{formatDateTime(t.createdAt)}</td>
-                    <td className="px-4 py-2.5 text-gray-200">{t.marketTitle}</td>
-                    <td className="px-4 py-2.5 text-gray-200">{t.outcomeLabel}</td>
+                    <td className="px-4 py-2.5 text-slate-700">{t.marketTitle}</td>
+                    <td className="px-4 py-2.5 text-slate-700">{t.outcomeLabel}</td>
                     <td className="px-4 py-2.5"><Badge tone={t.side === "BUY" ? "yes" : "no"}>{t.side}</Badge></td>
-                    <td className="px-4 py-2.5 text-right tabular text-gray-200">{t.shares}</td>
-                    <td className="px-4 py-2.5 text-right tabular text-gray-200">{t.priceCents}¢</td>
-                    <td className="px-4 py-2.5 text-right tabular text-white">{formatCredits(t.cash)}</td>
+                    <td className="px-4 py-2.5 text-right tabular text-slate-700">{t.shares}</td>
+                    <td className="px-4 py-2.5 text-right tabular text-slate-700">{t.priceCents}¢</td>
+                    <td className="px-4 py-2.5 text-right tabular text-body">{formatCredits(t.cash)}</td>
                   </tr>
                 ))}
               </tbody>

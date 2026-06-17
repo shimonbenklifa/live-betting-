@@ -19,9 +19,9 @@ export default async function PlayerPage({ params }: { params: { playerId: strin
       <TopBar title={`${player.firstName} ${player.lastName}`} subtitle={`${player.position} · #${player.jerseyNumber}`} cash={portfolio.cash} userName={user.displayName} />
       <div className="space-y-6 px-4 py-5 md:px-6">
         <Card className="flex items-center gap-4 p-5">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-ink-600 text-xl font-bold text-white">{player.jerseyNumber}</div>
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-ink-600 text-xl font-bold text-body">{player.jerseyNumber}</div>
           <div>
-            <h1 className="text-xl font-semibold text-white">{player.firstName} {player.lastName}</h1>
+            <h1 className="text-xl font-semibold text-body">{player.firstName} {player.lastName}</h1>
             <div className="mt-1 flex items-center gap-2">
               <Link href={`/teams/${player.teamId}`} className="text-sm text-brand hover:underline">{player.teamName}</Link>
               <Badge tone="muted">{player.position}</Badge>

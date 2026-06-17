@@ -35,12 +35,12 @@ export default async function LeaderboardPage() {
                   <tr key={r.userId} className={cn("hover:bg-ink-700", r.displayName === "You" && "bg-brand/5")}>
                     <td className="px-4 py-2.5">
                       <span className={cn("inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold",
-                        r.rank === 1 ? "bg-warn/20 text-warn" : r.rank <= 3 ? "bg-ink-600 text-white" : "text-muted")}>
+                        r.rank === 1 ? "bg-warn/20 text-warn" : r.rank <= 3 ? "bg-ink-600 text-body" : "text-muted")}>
                         {r.rank}
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 font-medium text-gray-200">{r.displayName}</td>
-                    <td className="px-4 py-2.5 text-right tabular font-semibold text-white">{formatCredits(r.totalValue)}</td>
+                    <td className="px-4 py-2.5 font-medium text-slate-700">{r.displayName}</td>
+                    <td className="px-4 py-2.5 text-right tabular font-semibold text-body">{formatCredits(r.totalValue)}</td>
                     <td className={cn("px-4 py-2.5 text-right tabular", pnlColor(r.realizedPnl))}>{signed(r.realizedPnl)}</td>
                     <td className={cn("px-4 py-2.5 text-right tabular", pnlColor(r.unrealizedPnl))}>{signed(r.unrealizedPnl)}</td>
                     <td className="px-4 py-2.5 text-right tabular text-muted">{r.tradeCount}</td>

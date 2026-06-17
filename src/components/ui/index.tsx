@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <div className={cn("rounded-xl border border-line bg-ink-800/80 backdrop-blur", className)}>{children}</div>
+    <div className={cn("rounded-xl border border-line bg-ink-800 shadow-card", className)}>{children}</div>
   );
 }
 
@@ -12,7 +12,7 @@ export function CardHeader({ title, subtitle, action }: { title: ReactNode; subt
   return (
     <div className="flex items-start justify-between gap-3 border-b border-line px-4 py-3">
       <div>
-        <h3 className="text-sm font-semibold text-white">{title}</h3>
+        <h3 className="text-sm font-semibold text-body">{title}</h3>
         {subtitle && <p className="mt-0.5 text-xs text-muted">{subtitle}</p>}
       </div>
       {action}
@@ -22,12 +22,12 @@ export function CardHeader({ title, subtitle, action }: { title: ReactNode; subt
 
 type BadgeTone = "default" | "yes" | "no" | "warn" | "brand" | "muted";
 const badgeTones: Record<BadgeTone, string> = {
-  default: "bg-ink-600 text-gray-200",
-  yes: "bg-yes/15 text-yes",
-  no: "bg-no/15 text-no",
-  warn: "bg-warn/15 text-warn",
-  brand: "bg-brand/15 text-brand",
-  muted: "bg-ink-700 text-muted"
+  default: "bg-ink-600 text-slate-700 ring-1 ring-inset ring-line",
+  yes: "bg-yes-50 text-yes ring-1 ring-inset ring-yes/20",
+  no: "bg-no-50 text-no ring-1 ring-inset ring-no/20",
+  warn: "bg-warn-50 text-warn ring-1 ring-inset ring-warn/20",
+  brand: "bg-brand-50 text-brand ring-1 ring-inset ring-brand/20",
+  muted: "bg-ink-700 text-muted ring-1 ring-inset ring-line"
 };
 
 export function Badge({ children, tone = "default", className }: { children: ReactNode; tone?: BadgeTone; className?: string }) {
@@ -40,9 +40,9 @@ export function Badge({ children, tone = "default", className }: { children: Rea
 
 export function Stat({ label, value, sub, tone }: { label: string; value: ReactNode; sub?: ReactNode; tone?: string }) {
   return (
-    <div className="rounded-xl border border-line bg-ink-800 px-4 py-3">
-      <div className="text-xs uppercase tracking-wide text-muted">{label}</div>
-      <div className={cn("mt-1 text-xl font-semibold tabular", tone)}>{value}</div>
+    <div className="rounded-xl border border-line bg-ink-800 px-4 py-3 shadow-card">
+      <div className="text-[11px] font-medium uppercase tracking-wide text-muted">{label}</div>
+      <div className={cn("mt-1 text-2xl font-semibold tabular text-body", tone)}>{value}</div>
       {sub && <div className="mt-0.5 text-xs text-muted">{sub}</div>}
     </div>
   );
@@ -72,8 +72,8 @@ export function buttonClass(variant: "primary" | "ghost" | "outline" | "yes" | "
   const base = "inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
   const variants = {
     primary: "bg-brand text-white hover:bg-brand-600",
-    ghost: "text-gray-200 hover:bg-ink-600",
-    outline: "border border-line text-gray-200 hover:bg-ink-600",
+    ghost: "text-slate-700 hover:bg-ink-600",
+    outline: "border border-line text-slate-700 hover:bg-ink-600",
     yes: "bg-yes/15 text-yes hover:bg-yes/25 border border-yes/30",
     no: "bg-no/15 text-no hover:bg-no/25 border border-no/30"
   };
@@ -83,7 +83,7 @@ export function buttonClass(variant: "primary" | "ghost" | "outline" | "yes" | "
 export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   return (
     <div className="rounded-xl border border-dashed border-line bg-ink-800/50 px-6 py-10 text-center">
-      <p className="text-sm font-medium text-gray-300">{title}</p>
+      <p className="text-sm font-medium text-slate-600">{title}</p>
       {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
     </div>
   );

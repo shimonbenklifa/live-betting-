@@ -4,13 +4,13 @@ import { buttonClass, Badge } from "@/components/ui";
 
 export default function LandingPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_0%,rgba(59,130,246,0.12),transparent)]" />
+    <div className="relative min-h-screen overflow-hidden bg-ink-900">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(60%_70%_at_50%_0%,rgba(37,99,235,0.10),transparent)]" />
       <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col px-6">
         <header className="flex items-center justify-between py-5">
           <div className="flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-sm font-bold text-white">L</span>
-            <span className="text-sm font-semibold text-white">{config.appName}</span>
+            <span className="text-sm font-semibold text-body">{config.appName}</span>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/login" className={buttonClass("ghost")}>Log in</Link>
@@ -20,7 +20,7 @@ export default function LandingPage() {
 
         <main className="flex flex-1 flex-col items-center justify-center py-16 text-center">
           <Badge tone="warn" className="mb-5">Play-money · Private league · Compliance-first</Badge>
-          <h1 className="max-w-3xl text-balance text-4xl font-bold tracking-tight text-white md:text-6xl">
+          <h1 className="max-w-3xl text-balance text-4xl font-bold tracking-tight text-body md:text-6xl">
             Prediction markets for your rec league.
           </h1>
           <p className="mt-5 max-w-xl text-balance text-base text-muted md:text-lg">
@@ -40,8 +40,8 @@ export default function LandingPage() {
               ["0", "Real-money risk"],
               ["RLS", "Per-league access"]
             ].map(([big, small]) => (
-              <div key={small} className="rounded-xl border border-line bg-ink-800/60 px-4 py-4">
-                <div className="text-2xl font-semibold text-white">{big}</div>
+              <div key={small} className="rounded-xl border border-line bg-ink-800 px-4 py-4 shadow-card">
+                <div className="text-2xl font-semibold text-brand">{big}</div>
                 <div className="mt-1 text-xs text-muted">{small}</div>
               </div>
             ))}

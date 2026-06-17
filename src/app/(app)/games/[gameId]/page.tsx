@@ -33,7 +33,7 @@ export default async function GameDetailPage({ params }: { params: { gameId: str
         </Card>
 
         <section>
-          <h2 className="mb-3 text-sm font-semibold text-white">Markets for this game</h2>
+          <h2 className="mb-3 text-sm font-semibold text-body">Markets for this game</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {markets.map((m) => (
               <MarketCard key={m.id} market={m} />
@@ -57,7 +57,7 @@ function TeamBlock({ name, abbr, color, record, score, alignRight }: { name: str
         {abbr}
       </div>
       <div>
-        <div className="text-sm font-semibold text-white">{name}</div>
+        <div className="text-sm font-semibold text-body">{name}</div>
         <div className="text-xs text-muted tabular">{record}{score != null ? ` · ${score} pts` : ""}</div>
       </div>
     </div>

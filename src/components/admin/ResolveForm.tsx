@@ -20,7 +20,7 @@ export function ResolveForm({ market }: { market: MarketVM }) {
       <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
         <div>
           <label className="mb-1 block text-xs text-muted">Winning outcome</label>
-          <select value={winner} onChange={(e) => setWinner(e.target.value)} className="w-full rounded-lg border border-line bg-ink-700 px-3 py-2 text-sm text-white">
+          <select value={winner} onChange={(e) => setWinner(e.target.value)} className="w-full rounded-lg border border-line bg-ink-700 px-3 py-2 text-sm text-body">
             <option value="">Select…</option>
             {market.outcomes.map((o) => (
               <option key={o.id} value={o.id}>{o.label} ({o.priceCents}¢)</option>
@@ -29,7 +29,7 @@ export function ResolveForm({ market }: { market: MarketVM }) {
         </div>
         <div>
           <label className="mb-1 block text-xs text-muted">Note (optional)</label>
-          <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Final 88-81" className="w-full rounded-lg border border-line bg-ink-700 px-3 py-2 text-sm text-white" />
+          <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Final 88-81" className="w-full rounded-lg border border-line bg-ink-700 px-3 py-2 text-sm text-body" />
         </div>
         <button onClick={submit} disabled={!winner} className={cn(buttonClass("primary"))}>
           Resolve

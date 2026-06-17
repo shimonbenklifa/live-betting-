@@ -33,13 +33,13 @@ export default async function TeamsPage() {
                       <td className="px-4 py-2.5">
                         <Link href={`/teams/${t.id}`} className="flex items-center gap-2.5">
                           <span className="flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-bold text-white" style={{ backgroundColor: t.homeColor }}>{t.abbreviation}</span>
-                          <span className="font-medium text-gray-200">{t.name}</span>
+                          <span className="font-medium text-slate-700">{t.name}</span>
                         </Link>
                       </td>
                       <td className="px-4 py-2.5 text-muted">{t.division}</td>
-                      <td className="px-4 py-2.5 text-right tabular text-white">{t.wins}</td>
-                      <td className="px-4 py-2.5 text-right tabular text-gray-200">{t.losses}</td>
-                      <td className="px-4 py-2.5 text-right tabular text-gray-200">{pct}</td>
+                      <td className="px-4 py-2.5 text-right tabular text-body">{t.wins}</td>
+                      <td className="px-4 py-2.5 text-right tabular text-slate-700">{t.losses}</td>
+                      <td className="px-4 py-2.5 text-right tabular text-slate-700">{pct}</td>
                       <td className="px-4 py-2.5 text-right tabular text-muted">{t.pointsFor}</td>
                       <td className="px-4 py-2.5 text-right tabular text-muted">{t.pointsAgainst}</td>
                     </tr>

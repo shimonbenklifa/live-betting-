@@ -27,7 +27,7 @@ export default async function LeagueHomePage() {
                 <div className="flex items-center gap-3">
                   <div className="w-16 text-xs text-muted">Wk {g.week}</div>
                   <div>
-                    <div className="text-sm font-medium text-white">
+                    <div className="text-sm font-medium text-body">
                       {g.awayTeam.name} <span className="text-muted">@</span> {g.homeTeam.name}
                     </div>
                     <div className="text-xs text-muted">{formatDateTime(g.startsAt)} · {g.venue}</div>
@@ -47,7 +47,7 @@ export default async function LeagueHomePage() {
         </Card>
 
         <section>
-          <h2 className="mb-3 text-sm font-semibold text-white">Game markets</h2>
+          <h2 className="mb-3 text-sm font-semibold text-body">Game markets</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {gameMarkets.map((m) => (
               <MarketCard key={m.id} market={m} />
@@ -57,7 +57,7 @@ export default async function LeagueHomePage() {
 
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-white">Futures markets</h2>
+            <h2 className="text-sm font-semibold text-body">Futures markets</h2>
             <Link href="/futures" className="text-xs text-brand hover:underline">All futures →</Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

@@ -115,14 +115,14 @@ export function ImportWizard() {
 
         {step === "map" && (
           <div className="space-y-4">
-            <div className="text-sm text-gray-200">Map columns from <span className="font-medium text-white">{filename}</span> ({rows.length} rows)</div>
+            <div className="text-sm text-slate-700">Map columns from <span className="font-medium text-body">{filename}</span> ({rows.length} rows)</div>
             <div className="grid gap-2 sm:grid-cols-2">
               {fields.map((f) => {
                 const matchedHeader = Object.entries(mapping).find(([, k]) => k === f.key)?.[0] ?? "";
                 return (
                   <div key={f.key} className="flex items-center gap-2 rounded-lg border border-line bg-ink-700 px-3 py-2">
                     <div className="flex-1 text-xs">
-                      <div className="font-medium text-white">{f.label}{f.required && <span className="text-no"> *</span>}</div>
+                      <div className="font-medium text-body">{f.label}{f.required && <span className="text-no"> *</span>}</div>
                       <div className="text-muted">{f.key}</div>
                     </div>
                     <select
@@ -133,7 +133,7 @@ export function ImportWizard() {
                         if (e.target.value) next[e.target.value] = f.key;
                         setMapping(next);
                       }}
-                      className="rounded-md border border-line bg-ink-800 px-2 py-1 text-xs text-white"
+                      className="rounded-md border border-line bg-ink-800 px-2 py-1 text-xs text-body"
                     >
                       <option value="">— unmapped —</option>
                       {headers.map((h) => <option key={h} value={h}>{h}</option>)}
@@ -173,7 +173,7 @@ export function ImportWizard() {
                     return (
                       <tr key={r.row} className={cn(hasError && "bg-no/5", r.isDuplicateInFile && "bg-warn/5")}>
                         <td className="px-3 py-1.5 text-muted">{r.row}</td>
-                        {fields.slice(0, 5).map((f) => <td key={f.key} className="px-3 py-1.5 text-gray-200">{String(r.data[f.key] ?? "")}</td>)}
+                        {fields.slice(0, 5).map((f) => <td key={f.key} className="px-3 py-1.5 text-slate-700">{String(r.data[f.key] ?? "")}</td>)}
                         <td className="px-3 py-1.5">
                           {r.issues.length === 0 ? (
                             <Badge tone="yes">ok</Badge>
@@ -220,7 +220,7 @@ function Tile({ label, value, tone }: { label: string; value: number; tone?: str
   return (
     <div className="rounded-lg border border-line bg-ink-700 px-3 py-2">
       <div className="text-[10px] uppercase text-muted">{label}</div>
-      <div className={cn("text-lg font-semibold tabular", tone ?? "text-white")}>{value}</div>
+      <div className={cn("text-lg font-semibold tabular", tone ?? "text-body")}>{value}</div>
     </div>
   );
 }
