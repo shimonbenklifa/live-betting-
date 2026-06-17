@@ -27,8 +27,8 @@ interface RawPos {
 
 const RAW_POSITIONS: RawPos[] = [
   { marketId: "m-g1-ml", outcomeId: "o-g1-yes", quantity: 120, costBasis: 7800, realizedPnl: 0 },
-  { marketId: "m-champ", outcomeId: "o-ch-bal", quantity: 80, costBasis: 2960, realizedPnl: 0 },
-  { marketId: "m-mvp", outcomeId: "o-mvp-reed", quantity: 60, costBasis: 1860, realizedPnl: 420 },
+  { marketId: "m-champ", outcomeId: "o-ch-5tr", quantity: 80, costBasis: 2960, realizedPnl: 0 },
+  { marketId: "m-mvp", outcomeId: "o-mvp-homnick", quantity: 60, costBasis: 1860, realizedPnl: 420 },
   { marketId: "m-g1-total", outcomeId: "o-g1t-over", quantity: 40, costBasis: 2080, realizedPnl: 0 }
 ];
 
@@ -53,10 +53,10 @@ function buildPositions(): PositionVM[] {
 }
 
 const DEMO_TRADES: TradeVM[] = [
-  { id: "tr-1", marketTitle: "Ballers to beat Night Hawks", outcomeLabel: "YES", side: "BUY", shares: 120, priceCents: 65, cash: 7800, createdAt: "2026-06-15T18:02:00Z" },
-  { id: "tr-2", marketTitle: "League Champion 2026", outcomeLabel: "Ballers", side: "BUY", shares: 80, priceCents: 37, cash: 2960, createdAt: "2026-06-14T20:15:00Z" },
-  { id: "tr-3", marketTitle: "Regular Season MVP", outcomeLabel: "Marcus Reed (BAL)", side: "BUY", shares: 100, priceCents: 24, cash: 2400, createdAt: "2026-06-12T19:40:00Z" },
-  { id: "tr-4", marketTitle: "Regular Season MVP", outcomeLabel: "Marcus Reed (BAL)", side: "SELL", shares: 40, priceCents: 31, cash: 1240, createdAt: "2026-06-13T21:05:00Z" },
+  { id: "tr-1", marketTitle: "5T Restoration to beat Crown Home Care", outcomeLabel: "YES", side: "BUY", shares: 120, priceCents: 65, cash: 7800, createdAt: "2026-06-15T18:02:00Z" },
+  { id: "tr-2", marketTitle: "League Champion — Season 3", outcomeLabel: "5T Restoration", side: "BUY", shares: 80, priceCents: 37, cash: 2960, createdAt: "2026-06-14T20:15:00Z" },
+  { id: "tr-3", marketTitle: "Regular Season MVP", outcomeLabel: "Chaim Homnick (5TR)", side: "BUY", shares: 100, priceCents: 24, cash: 2400, createdAt: "2026-06-12T19:40:00Z" },
+  { id: "tr-4", marketTitle: "Regular Season MVP", outcomeLabel: "Chaim Homnick (5TR)", side: "SELL", shares: 40, priceCents: 31, cash: 1240, createdAt: "2026-06-13T21:05:00Z" },
   { id: "tr-5", marketTitle: "Over/Under 165.5 total points", outcomeLabel: "OVER", side: "BUY", shares: 40, priceCents: 52, cash: 2080, createdAt: "2026-06-16T17:22:00Z" }
 ];
 
@@ -75,7 +75,7 @@ export function demoPortfolio(): PortfolioVM {
   };
 }
 
-const NAMES = ["Marcus R.", "Dre C.", "Tomas V.", "Will B.", "You", "Sam P.", "Andre S.", "Kofi M.", "Diego T.", "Noah B."];
+const NAMES = ["Chaim Homnick", "Daniel Goldfarb", "Jeremy Tabak", "Ari Schwartz", "You", "Yitzi Gross", "Mo Feintuch", "Rich Hochhauser", "Jesse Slone", "Yehuda Zin"];
 
 export function demoLeaderboard(): LeaderboardRow[] {
   const rows = NAMES.map((name, i) => {
@@ -117,17 +117,17 @@ export function demoStatLeaderboards(): StatLeaderboardVM[] {
 
 export function demoAuditLog(): AuditEntryVM[] {
   return [
-    { id: "a-1", actor: "You", action: "CREATE_MARKET", entityType: "Market", detail: { title: "Ballers to beat Night Hawks" }, createdAt: "2026-06-15T17:00:00Z" },
-    { id: "a-2", actor: "You", action: "IMPORT_COMMIT", entityType: "ImportBatch", detail: { type: "rosters", rows: 30 }, createdAt: "2026-06-14T12:30:00Z" },
-    { id: "a-3", actor: "You", action: "ADJUST_BALANCE", entityType: "Wallet", detail: { user: "Sam P.", delta: 500, reason: "Welcome bonus correction" }, createdAt: "2026-06-13T09:10:00Z" },
-    { id: "a-4", actor: "You", action: "RESOLVE_MARKET", entityType: "Market", detail: { title: "Hawks to beat Sharks (Wk 11)", winner: "YES", payout: 4200 }, createdAt: "2026-06-11T22:45:00Z" }
+    { id: "a-1", actor: "You", action: "CREATE_MARKET", entityType: "Market", detail: { title: "5T Restoration to beat Crown Home Care" }, createdAt: "2026-06-15T17:00:00Z" },
+    { id: "a-2", actor: "You", action: "IMPORT_COMMIT", entityType: "ImportBatch", detail: { type: "rosters", rows: 84 }, createdAt: "2026-06-14T12:30:00Z" },
+    { id: "a-3", actor: "You", action: "ADJUST_BALANCE", entityType: "Wallet", detail: { user: "Yehuda Zin", delta: 500, reason: "Welcome bonus correction" }, createdAt: "2026-06-13T09:10:00Z" },
+    { id: "a-4", actor: "You", action: "RESOLVE_MARKET", entityType: "Market", detail: { title: "Zlotowitz Law vs JWorks (Wk 11)", winner: "JWorks", payout: 4200 }, createdAt: "2026-06-11T22:45:00Z" }
   ];
 }
 
 export function demoImportBatches(): ImportBatchVM[] {
   return [
-    { id: "ib-1", type: "teams", filename: "teams.csv", status: "committed", totalRows: 6, validRows: 6, errorRows: 0, committedRows: 6, createdAt: "2026-06-14T12:10:00Z" },
-    { id: "ib-2", type: "rosters", filename: "rosters.xlsx", status: "committed", totalRows: 32, validRows: 30, errorRows: 2, committedRows: 30, createdAt: "2026-06-14T12:30:00Z" },
+    { id: "ib-1", type: "teams", filename: "teams.csv", status: "committed", totalRows: 12, validRows: 12, errorRows: 0, committedRows: 12, createdAt: "2026-06-14T12:10:00Z" },
+    { id: "ib-2", type: "rosters", filename: "season3_rosters.xlsx", status: "committed", totalRows: 84, validRows: 84, errorRows: 0, committedRows: 84, createdAt: "2026-06-14T12:30:00Z" },
     { id: "ib-3", type: "games", filename: "schedule.csv", status: "previewed", totalRows: 22, validRows: 21, errorRows: 1, committedRows: 0, createdAt: "2026-06-16T08:05:00Z" }
   ];
 }
